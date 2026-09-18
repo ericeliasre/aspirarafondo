@@ -1,3 +1,4 @@
-# Preparación: las páginas conservan noindex. Permitir rastreo para que se lea.
 User-agent: *
 Allow: /
+
+Sitemap: https://aspirarafondo.com/sitemap.xml
