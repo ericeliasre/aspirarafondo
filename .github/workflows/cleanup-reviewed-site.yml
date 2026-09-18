@@ -1,0 +1,70 @@
+name: Remove obsolete draft pages
+
+on:
+  push:
+    paths:
+      - ".github/workflows/cleanup-reviewed-site.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep only the reviewed public site
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          keep = {
+              "dist/404.html",
+              "dist/analisis.html",
+              "dist/aviso-legal.html",
+              "dist/contacto.html",
+              "dist/criterio-editorial.html",
+              "dist/guias.html",
+              "dist/imagenes-y-licencias.html",
+              "dist/index.html",
+              "dist/mantenimiento.html",
+              "dist/privacidad.html",
+              "dist/quienes-somos.html",
+              "dist/robot-small.jpg",
+              "dist/robots.txt",
+              "dist/sitemap.xml",
+              "dist/styles.css",
+              "dist/articulos/como-elegir-un-robot-aspirador-guia-completa.html",
+              "dist/articulos/como-limpiar-los-sensores-de-un-robot-aspirador.html",
+              "dist/articulos/como-mapear-correctamente-tu-casa-con-el-robot-aspirador.html",
+              "dist/articulos/cuando-cambiar-el-filtro-de-tu-robot-aspirador.html",
+              "dist/articulos/cuanto-cuesta-mantener-un-robot-aspirador-al-ano.html",
+              "dist/articulos/narwal-freo-x-ultra-analisis-documental.html",
+              "dist/articulos/robot-aspirador-con-o-sin-estacion-de-autovaciado-cual-elegir.html",
+              "dist/articulos/robot-aspirador-no-carga-soluciones.html",
+              "dist/articulos/robot-aspirador-no-conecta-al-wifi-solucion.html",
+              "dist/articulos/robot-aspirador-vs-aspirador-tradicional-ventajas-y-desventajas.html",
+              "dist/articulos/robots-aspiradores-en-casas-con-desniveles-y-escaleras.html",
+              "dist/articulos/xiaomi-robot-vacuum-x20-max-analisis-documental.html",
+              "dist/imagenes/roborock-q8-max-plus.jpg",
+              "dist/imagenes/roomba-e6-inferior.jpg",
+              "dist/imagenes/roomba-i7-plus.jpg",
+          }
+
+          for path in Path("dist").rglob("*"):
+              if path.is_file() and path.as_posix() not in keep:
+                  path.unlink()
+
+          Path(".github/workflows/cleanup-reviewed-site.yml").unlink(missing_ok=True)
+          PY
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Remove obsolete draft pages"
+            git push
+          fi
